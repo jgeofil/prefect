@@ -103,8 +103,8 @@ def test_copy_requires_name():
 
 class TestDateTimeParameter:
     @prefect.task
-    def return_value(x):
-        return x
+    def return_value(self):
+        return self
 
     with Flow("test") as dt_flow:
         dt = DateTimeParameter("dt", required=False)

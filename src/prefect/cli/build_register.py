@@ -63,8 +63,7 @@ def handle_terminal_error(func):
         try:
             return func(*args, **kwargs)
         except TerminalError as exc:
-            msg = str(exc)
-            if msg:
+            if msg := str(exc):
                 click.secho(msg, fg="red")
             sys.exit(1)
 
@@ -267,8 +266,9 @@ def collect_flows(
             source: [f for f in flows if f.name in names]
             for source, flows in out.items()
         }
-        missing = names.difference(f.name for flows in out.values() for f in flows)
-        if missing:
+        if missing := names.difference(
+            f.name for flows in out.values() for f in flows
+        ):
             missing_flows = "\n".join(f"- {n}" for n in sorted(missing))
             click.secho(
                 f"Failed to find the following flows:\n{missing_flows}", fg="red"
@@ -578,13 +578,11 @@ def watch_for_changes(
     that changed.
     """
     paths = list(paths or ())
-    modules = list(modules or ())
-
     for path in paths:
         if not os.path.exists(path):
             raise TerminalError(f"Path {path!r} doesn't exist")
 
-    if modules:
+    if modules := list(modules or ()):
         # If modules are provided, we need to convert these to paths to watch.
         # There's no way in Python to do this without possibly importing the
         # defining module. As such, we run the command in a temporary process

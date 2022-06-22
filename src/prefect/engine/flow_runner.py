@@ -91,7 +91,7 @@ class FlowRunner(Runner):
         super().__init__(state_handlers=state_handlers)
 
     def __repr__(self) -> str:
-        return "<{}: {}>".format(type(self).__name__, self.flow.name)
+        return f"<{type(self).__name__}: {self.flow.name}>"
 
     def call_runner_target_handlers(self, old_state: State, new_state: State) -> State:
         """
@@ -242,7 +242,7 @@ class FlowRunner(Runner):
             - State: `State` representing the final post-run state of the `Flow`.
 
         """
-        self.logger.info("Beginning Flow run for '{}'".format(self.flow.name))
+        self.logger.info(f"Beginning Flow run for '{self.flow.name}'")
 
         # make copies to avoid modifying user inputs
         parameters = dict(parameters or {})
@@ -250,13 +250,13 @@ class FlowRunner(Runner):
         task_contexts = dict(task_contexts or {})
         # Default to global context, with provided context as override
         run_context = dict(prefect.context)
-        run_context.update(context or {})
+        run_context |= (context or {})
 
         if executor is None:
             # Use the executor on the flow, if configured
             executor = getattr(self.flow, "executor", None)
-            if executor is None:
-                executor = prefect.engine.get_default_executor_class()()
+        if executor is None:
+            executor = prefect.engine.get_default_executor_class()()
 
         self.logger.debug("Using executor type %s", type(executor).__name__)
 
@@ -285,17 +285,15 @@ class FlowRunner(Runner):
         except ENDRUN as exc:
             state = exc.state
 
-        # All other exceptions are trapped and turned into Failed states
         except Exception as exc:
-            self.logger.exception(
-                "Unexpected error while running flow: {}".format(repr(exc))
-            )
+            self.logger.exception(f"Unexpected error while running flow: {repr(exc)}")
             if run_context.get("raise_on_exception"):
                 raise exc
             new_state = Failed(
-                message="Unexpected error while running flow: {}".format(repr(exc)),
+                message=f"Unexpected error while running flow: {repr(exc)}",
                 result=exc,
             )
+
             state = self.handle_state_change(state or Pending(), new_state)
 
         return state
@@ -323,14 +321,17 @@ class FlowRunner(Runner):
         Raises:
             - ENDRUN: if the flow is Scheduled with a future scheduled time
         """
-        if isinstance(state, Scheduled):
-            if state.start_time and state.start_time > pendulum.now("utc"):
-                self.logger.debug(
-                    "Flow '{name}': start_time has not been reached; ending run.".format(
-                        name=self.flow.name
-                    )
+        if (
+            isinstance(state, Scheduled)
+            and state.start_time
+            and state.start_time > pendulum.now("utc")
+        ):
+            self.logger.debug(
+                "Flow '{name}': start_time has not been reached; ending run.".format(
+                    name=self.flow.name
                 )
-                raise ENDRUN(state)
+            )
+            raise ENDRUN(state)
         return state
 
     @call_state_handlers

@@ -191,7 +191,7 @@ def test_create_key(patch_post, cloud_api, quiet, expires):
 
     result = runner.invoke(auth, ["create-key", "-n", "this-name"] + args)
     assert result.exit_code == 0
-    assert "this-key" in result.output if not quiet else "this-key\n" == result.output
+    assert result.output == "this-key\n" if quiet else "this-key" in result.output
 
     # Check for the correct API call
     inputs = json.loads(post.call_args[1]["json"]["variables"])["input"]

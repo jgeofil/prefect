@@ -162,9 +162,10 @@ def patch_posts(monkeypatch):
         if not isinstance(responses, list):
             responses = [responses]
 
-        resps = []
-        for response in responses:
-            resps.append(MagicMock(json=MagicMock(return_value=response)))
+        resps = [
+            MagicMock(json=MagicMock(return_value=response))
+            for response in responses
+        ]
 
         post = MagicMock(side_effect=resps)
         session = MagicMock()

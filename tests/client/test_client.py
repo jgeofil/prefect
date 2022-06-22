@@ -912,7 +912,7 @@ def test_client_delete_project_error(patch_post, monkeypatch):
     ):
         client = Client()
 
-    with pytest.raises(ValueError, match="Project {} not found".format(project_name)):
+    with pytest.raises(ValueError, match=f"Project {project_name} not found"):
         client.delete_project(project_name=project_name)
 
 
@@ -1599,14 +1599,14 @@ def test_create_flow_run_with_input(patch_post, use_flow_id, use_extra_args):
             scheduled_start_time=expected["scheduled_start_time"].isoformat(),
             **kwargs,
         )
-        kwargs.update(extra_kwargs)
+        kwargs |= extra_kwargs
     else:
         expected = kwargs
 
     assert client.create_flow_run(**kwargs) == "FOO"
     variables = json.loads(post.call_args[1]["json"]["variables"])
     input = variables["input"]
-    assert variables["input"] == expected
+    assert input == expected
 
 
 def test_get_default_tenant_slug(patch_post):

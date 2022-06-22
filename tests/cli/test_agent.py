@@ -173,27 +173,26 @@ def test_agent_start(name, import_path, extra_cmd, extra_kwargs, monkeypatch):
 def test_agent_local_install(monkeypatch):
     from prefect.agent.local import LocalAgent
 
-    command = ["local", "install"]
-    command.extend(("--key TEST-KEY --tenant-id TENANT").split())
-    command.extend(
-        (
+    command = [
+        "local",
+        "install",
+        *("--key TEST-KEY --tenant-id TENANT").split(),
+        *(
             "-l label1 -l label2 -e KEY1=VALUE1 -e KEY2=VALUE2 "
             "-p path1 -p path2 --show-flow-logs --agent-config-id foo"
-        ).split()
-    )
+        ).split(),
+    ]
 
     expected_kwargs = {
-        "key": None,
-        "tenant_id": None,
         "labels": ["label1", "label2"],
         "env_vars": {"KEY1": "VALUE1", "KEY2": "VALUE2"},
         "import_paths": ["path1", "path2"],
         "show_flow_logs": True,
         "agent_config_id": "foo",
+        "key": "TEST-KEY",
+        "tenant_id": "TENANT",
     }
 
-    expected_kwargs["key"] = "TEST-KEY"
-    expected_kwargs["tenant_id"] = "TENANT"
 
     generate = MagicMock(wraps=LocalAgent.generate_supervisor_conf)
     monkeypatch.setattr(
@@ -210,22 +209,21 @@ def test_agent_local_install(monkeypatch):
 def test_agent_kubernetes_install(monkeypatch):
     from prefect.agent.kubernetes import KubernetesAgent
 
-    command = ["kubernetes", "install"]
-    command.extend("--key TEST-KEY --tenant-id TENANT".split())
-    command.extend(
-        (
+    command = [
+        "kubernetes",
+        "install",
+        *"--key TEST-KEY --tenant-id TENANT".split(),
+        *(
             "-l label1 -l label2 -e KEY1=VALUE1 -e KEY2=VALUE2 "
             "--api TEST_API --namespace TEST_NAMESPACE --rbac "
             "--latest --image-pull-secrets secret-test --mem-request mem_req "
             "--mem-limit mem_lim --cpu-request cpu_req --cpu-limit cpu_lim "
             "--image-pull-policy custom_policy --service-account-name svc_name "
             "-b backend-test --agent-config-id foo"
-        ).split()
-    )
+        ).split(),
+    ]
 
     expected_kwargs = {
-        "key": "TEST-KEY",
-        "tenant_id": "TENANT",
         "labels": ["label1", "label2"],
         "env_vars": {"KEY1": "VALUE1", "KEY2": "VALUE2"},
         "api": "TEST_API",
@@ -241,10 +239,10 @@ def test_agent_kubernetes_install(monkeypatch):
         "service_account_name": "svc_name",
         "backend": "backend-test",
         "agent_config_id": "foo",
+        "key": "TEST-KEY",
+        "tenant_id": "TENANT",
     }
 
-    expected_kwargs["key"] = "TEST-KEY"
-    expected_kwargs["tenant_id"] = "TENANT"
 
     generate = MagicMock(wraps=KubernetesAgent.generate_deployment_yaml)
     monkeypatch.setattr(

@@ -46,7 +46,7 @@ def test_expand_paths_glob(tmpdir):
         path.touch()
 
     result = expand_paths([glob_path])
-    assert set(result) == set(str(path.absolute()) for path in expected_paths)
+    assert set(result) == {str(path.absolute()) for path in expected_paths}
 
 
 def test_expand_paths_dir_listing(tmpdir):
@@ -66,7 +66,7 @@ def test_expand_paths_dir_listing(tmpdir):
         path.touch()
 
     result = expand_paths([dir_path])
-    assert set(result) == set(str(path.absolute()) for path in expected_paths)
+    assert set(result) == {str(path.absolute()) for path in expected_paths}
 
 
 def test_expand_paths_full_paths(tmpdir):
@@ -84,7 +84,7 @@ def test_expand_paths_full_paths(tmpdir):
         path.touch()
 
     result = expand_paths([str(path.absolute()) for path in paths])
-    assert set(result) == set(str(path.absolute()) for path in paths)
+    assert set(result) == {str(path.absolute()) for path in paths}
 
 
 class TestWatchForChanges:

@@ -109,5 +109,4 @@ class FlowSchema(ObjectSchema):
 
         """
         data["validate"] = False
-        flow = super().create_object(data)
-        return flow
+        return super().create_object(data)

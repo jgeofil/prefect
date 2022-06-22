@@ -148,7 +148,7 @@ class TestSetupComposeEnv:
             "POSTGRES_PASSWORD": "E",
             "POSTGRES_USER": "F",
             "PREFECT_API_HEALTH_URL": "http://graphql:3/health",
-            "PREFECT_API_URL": f"http://graphql:3/G",
+            "PREFECT_API_URL": "http://graphql:3/G",
             "PREFECT_CORE_VERSION": prefect.__version__,
             "PREFECT_SERVER_DB_CMD": "prefect-server database upgrade -y",
             "PREFECT_SERVER_TAG": "A",
@@ -156,6 +156,7 @@ class TestSetupComposeEnv:
             "UI_HOST_PORT": "4",
             "PREFECT_SERVER__TELEMETRY__ENABLED": "false",
         }
+
 
         for key, expected_value in expected.items():
             assert env[key] == expected_value
@@ -203,7 +204,7 @@ class TestSetupComposeEnv:
             "HASURA_HOST_PORT": "2",
             "HASURA_WS_URL": "ws://hasura:2/v1alpha1/graphql",
             "PREFECT_API_HEALTH_URL": "http://graphql:3/health",
-            "PREFECT_API_URL": f"http://graphql:3/G",
+            "PREFECT_API_URL": "http://graphql:3/G",
             "PREFECT_CORE_VERSION": prefect.__version__,
             "PREFECT_SERVER_DB_CMD": "prefect-server database upgrade -y",
             "PREFECT_SERVER_TAG": "A",
@@ -211,6 +212,7 @@ class TestSetupComposeEnv:
             "UI_HOST_PORT": "4",
             "PREFECT_SERVER__TELEMETRY__ENABLED": "false",
         }
+
 
         for key, expected_value in expected.items():
             assert env[key] == expected_value
@@ -223,7 +225,7 @@ class TestSetupComposeEnv:
             "POSTGRES_PASSWORD",
             "POSTGRES_USER",
         )
-        assert all([key not in env for key in not_expected])
+        assert all(key not in env for key in not_expected)
 
 
 class TestSetupComposeFile:
@@ -328,11 +330,7 @@ class TestPrefectServerStart:
     def test_server_start_setup_and_teardown(self, macos_platform, mock_subprocess):
         # Pull current version information to test default values
         base_version = prefect.__version__.split("+")
-        if len(base_version) > 1:
-            default_tag = "master"
-        else:
-            default_tag = f"core-{base_version[0]}"
-
+        default_tag = "master" if len(base_version) > 1 else f"core-{base_version[0]}"
         expected_env = setup_compose_env(
             version=default_tag,
             ui_version=default_tag,
@@ -479,11 +477,7 @@ class TestPrefectServerConfig:
     def test_server_config_setup(self, mock_subprocess):
         # Pull current version information to test default values
         base_version = prefect.__version__.split("+")
-        if len(base_version) > 1:
-            default_tag = "master"
-        else:
-            default_tag = f"core-{base_version[0]}"
-
+        default_tag = "master" if len(base_version) > 1 else f"core-{base_version[0]}"
         expected_env = setup_compose_env(
             version=default_tag,
             ui_version=default_tag,

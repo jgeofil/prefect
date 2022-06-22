@@ -50,7 +50,6 @@ def call_state_handlers(method: Callable[..., State]) -> Callable[..., State]:
             raise_end_run = True
             new_state = exc.state
 
-        # PrefectStateSignals are trapped and turned into States
         except signals.PrefectStateSignal as exc:
             self.logger.info(
                 "{name} signal raised: {rep}".format(
@@ -62,7 +61,7 @@ def call_state_handlers(method: Callable[..., State]) -> Callable[..., State]:
             new_state = exc.state
 
         except Exception as exc:
-            formatted = "Unexpected error: {}".format(repr(exc))
+            formatted = f"Unexpected error: {repr(exc)}"
             self.logger.exception(formatted, exc_info=True)
             if raise_on_exception:
                 raise exc
@@ -164,21 +163,18 @@ class Runner:
             for handler in self.state_handlers:
                 new_state = handler(self, old_state, new_state) or new_state
 
-        # raise pauses and ENDRUNs
         except (signals.PAUSE, ENDRUN):
             raise
 
-        # trap signals
         except signals.PrefectStateSignal as exc:
             if raise_on_exception:
                 raise
             return exc.state
 
-        # abort on errors
         except Exception as exc:
             if raise_on_exception:
                 raise
-            msg = "Unexpected error while calling state handlers: {}".format(repr(exc))
+            msg = f"Unexpected error while calling state handlers: {repr(exc)}"
             self.logger.exception(msg)
             raise ENDRUN(Failed(msg, result=exc)) from exc
         return new_state

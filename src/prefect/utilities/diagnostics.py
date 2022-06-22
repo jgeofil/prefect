@@ -95,10 +95,11 @@ def environment_variables() -> dict:
     Returns:
         - dict: a dictionary containing names of set Prefect environment variables
     """
-    env_vars = list()
-    for env_var, _ in os.environ.items():
-        if env_var.startswith(prefect.configuration.ENV_VAR_PREFIX + "__"):
-            env_vars.append(env_var)
+    env_vars = [
+        env_var
+        for env_var, _ in os.environ.items()
+        if env_var.startswith(f"{prefect.configuration.ENV_VAR_PREFIX}__")
+    ]
 
     return dict(env_vars=env_vars)
 
@@ -188,9 +189,9 @@ def diagnostic_info(
     Returns:
         - str: a string representation of the full diagnostic information
     """
-    aggregate_info = dict()
+    aggregate_info = {}
 
-    aggregate_info.update(system_information())
+    aggregate_info |= system_information()
     aggregate_info.update(config_overrides(include_secret_names))
     aggregate_info.update(environment_variables())
 

@@ -170,10 +170,8 @@ class TestCreateFlow:
 
         assert res.auto_generated is False
         assert all(
-            [
-                t.auto_generated is True
-                for t in f.get_tasks(task_type=prefect.tasks.core.constants.Constant)
-            ]
+            t.auto_generated is True
+            for t in f.get_tasks(task_type=prefect.tasks.core.constants.Constant)
         )
 
 
@@ -389,8 +387,8 @@ def test_context_manager_is_properly_applied_to_tasks():
     with pytest.raises(ValueError):
         t3.bind()
 
-    assert f1.tasks == set([t1])
-    assert f2.tasks == set([t2])
+    assert f1.tasks == {t1}
+    assert f2.tasks == {t2}
 
 
 def test_that_flow_adds_and_removes_itself_from_prefect_context():
@@ -408,10 +406,10 @@ def test_add_edge():
     t1 = Task()
     t2 = Task()
     f.add_edge(upstream_task=t1, downstream_task=t2)
-    assert f.upstream_tasks(t2) == set([t1])
+    assert f.upstream_tasks(t2) == {t1}
     assert f.upstream_tasks(t1) == set()
     assert f.downstream_tasks(t2) == set()
-    assert f.downstream_tasks(t1) == set([t2])
+    assert f.downstream_tasks(t1) == {t2}
     assert f.edges_to(t2) == f.edges_from(t1)
 
 
@@ -464,7 +462,7 @@ def test_chain():
     t4 = Task()
     edges = f.chain(t1, t2, t3, t4)
 
-    assert f.tasks == set([t1, t2, t3, t4])
+    assert f.tasks == {t1, t2, t3, t4}
     assert f.edges == set(edges)
 
 
@@ -617,7 +615,7 @@ def test_copy():
     f.add_edge(Task(), Task())
     assert len(f2.tasks) == len(f.tasks) - 2
     assert len(f2.edges) == len(f.edges) - 1
-    assert f.reference_tasks() == f2.reference_tasks() == set([t1])
+    assert f.reference_tasks() == f2.reference_tasks() == {t1}
     assert id(f.slugs) != id(f2.slugs)
 
 
@@ -637,7 +635,7 @@ def test_infer_root_tasks():
     f.add_edge(t1, t2)
     f.add_edge(t2, t3)
 
-    assert f.root_tasks() == set([t1])
+    assert f.root_tasks() == {t1}
 
 
 def test_infer_terminal_tasks():
@@ -651,7 +649,7 @@ def test_infer_terminal_tasks():
     f.add_edge(t2, t3)
     f.add_task(t4)
 
-    assert f.terminal_tasks() == set([t3, t4])
+    assert f.terminal_tasks() == {t3, t4}
 
 
 def test_reference_tasks_are_terminal_tasks_by_default():
@@ -665,7 +663,7 @@ def test_reference_tasks_are_terminal_tasks_by_default():
     f.add_edge(t2, t3)
     f.add_task(t4)
 
-    assert f.reference_tasks() == f.terminal_tasks() == set([t3, t4])
+    assert f.reference_tasks() == f.terminal_tasks() == {t3, t4}
 
 
 def test_set_reference_tasks():
@@ -680,7 +678,7 @@ def test_set_reference_tasks():
     f.set_reference_tasks([])
     assert f.reference_tasks() == f.terminal_tasks()
     f.set_reference_tasks([t2])
-    assert f.reference_tasks() == set([t2])
+    assert f.reference_tasks() == {t2}
 
 
 def test_set_reference_tasks_at_init_with_empty_flow_raises_error():
@@ -692,11 +690,11 @@ def test_set_reference_tasks_at_init_with_empty_flow_raises_error():
 def test_set_reference_tasks_at_init():
     t1 = Task()
     f = Flow(name="test", reference_tasks=[t1], tasks=[t1])
-    assert f.reference_tasks() == set([t1]) == f.tasks == f.terminal_tasks()
+    assert f.reference_tasks() == {t1} == f.tasks == f.terminal_tasks()
 
     t2 = Task()
     f = Flow(name="test", reference_tasks=[t2], tasks=[t1, t2])
-    assert f.reference_tasks() == set([t2])
+    assert f.reference_tasks() == {t2}
 
 
 def test_reset_reference_tasks_to_terminal_tasks():
@@ -710,7 +708,7 @@ def test_reset_reference_tasks_to_terminal_tasks():
     f.add_edge(t2, t3)
 
     f.set_reference_tasks([t2])
-    assert f.reference_tasks() == set([t2])
+    assert f.reference_tasks() == {t2}
     f.set_reference_tasks([])
     assert f.reference_tasks() == f.terminal_tasks()
 
@@ -1123,9 +1121,9 @@ def test_sorted_tasks_with_ambiguous_sort():
     f.add_edge(bottleneck, t6)
 
     tasks = f.sorted_tasks()
-    assert set(tasks[:3]) == set([t1, t2, t3])
+    assert set(tasks[:3]) == {t1, t2, t3}
     assert list(tasks)[3] is bottleneck
-    assert set(tasks[4:]) == set([t4, t5, t6])
+    assert set(tasks[4:]) == {t4, t5, t6}
 
 
 def test_sorted_tasks_with_start_task():
@@ -1143,8 +1141,8 @@ def test_sorted_tasks_with_start_task():
     f.add_edge(t2, t3)
     f.add_edge(t3, t4)
     f.add_edge(t3, t5)
-    assert set(f.sorted_tasks(root_tasks=[])) == set([t1, t2, t3, t4, t5])
-    assert set(f.sorted_tasks(root_tasks=[t3])) == set([t3, t4, t5])
+    assert set(f.sorted_tasks(root_tasks=[])) == {t1, t2, t3, t4, t5}
+    assert set(f.sorted_tasks(root_tasks=[t3])) == {t3, t4, t5}
 
 
 def test_sorted_tasks_with_invalid_start_task():
@@ -1508,10 +1506,11 @@ class TestFlowVisualize:
             )
 
         assert "{first} -> {second} [label=x style=dashed]".format(
-            first=str(id(first_res)) + "0", second=str(id(res)) + "0"
+            first=f"{id(first_res)}0", second=f"{id(res)}0"
         )
+
         assert "{first} -> {second} [label=x style=dashed]".format(
-            first=str(id(first_res)) + "1", second=str(id(res)) + "1"
+            first=f"{id(first_res)}1", second=f"{id(res)}1"
         )
 
     @pytest.mark.parametrize(
@@ -1614,14 +1613,14 @@ class TestCache:
 
         # check that cache holds result
         key = ("root_tasks", ())
-        assert f._cache[key] == set([t1])
+        assert f._cache[key] == {t1}
 
         # check that cache is read
         f._cache[key] = 1
         assert f.root_tasks() == 1
 
         f.add_edge(t2, t3)
-        assert f.root_tasks() == set([t1])
+        assert f.root_tasks() == {t1}
 
     def test_cache_terminal_tasks(self):
         f = Flow(name="test")
@@ -1634,14 +1633,14 @@ class TestCache:
 
         # check that cache holds result
         key = ("terminal_tasks", ())
-        assert f._cache[key] == set([t2])
+        assert f._cache[key] == {t2}
 
         # check that cache is read
         f._cache[key] = 1
         assert f.terminal_tasks() == 1
 
         f.add_edge(t2, t3)
-        assert f.terminal_tasks() == set([t3])
+        assert f.terminal_tasks() == {t3}
 
     def test_cache_all_upstream_edges(self):
         f = Flow(name="test")
@@ -2075,11 +2074,10 @@ class TestFlowRunMethod:
                 super().__init__(clocks=[])
 
             def next(self, n, **kwargs):
-                if self.call_count < self.n:
-                    self.call_count += 1
-                    return [ClockEvent(pendulum.now("UTC").add(seconds=0.1))]
-                else:
+                if self.call_count >= self.n:
                     return []
+                self.call_count += 1
+                return [ClockEvent(pendulum.now("UTC").add(seconds=0.1))]
 
         return RepeatSchedule
 
@@ -2283,10 +2281,7 @@ class TestFlowRunMethod:
 
             def run(self):
                 self.call_count += 1
-                if self.maxit:
-                    return max(self.call_count, 2)
-                else:
-                    return self.call_count
+                return max(self.call_count, 2) if self.maxit else self.call_count
 
         @task(
             cache_for=datetime.timedelta(minutes=1),
@@ -2319,10 +2314,7 @@ class TestFlowRunMethod:
 
             def run(self):
                 self.call_count += 1
-                if self.maxit:
-                    return max(self.call_count, 2)
-                else:
-                    return self.call_count
+                return max(self.call_count, 2) if self.maxit else self.call_count
 
         @task(
             cache_for=datetime.timedelta(minutes=1),
@@ -2374,10 +2366,7 @@ class TestFlowRunMethod:
 
             def run(self):
                 self.call_count += 1
-                if self.maxit:
-                    return [max(self.call_count, 2)] * 3
-                else:
-                    return [self.call_count] * 3
+                return [max(self.call_count, 2)] * 3 if self.maxit else [self.call_count] * 3
 
         @task(
             cache_for=datetime.timedelta(minutes=1),
@@ -3290,7 +3279,7 @@ def test_run_agent_passes_flow_labels(monkeypatch):
     f.run_agent()
 
     assert type(agent.call_args[1]["labels"]) is list
-    assert set(agent.call_args[1]["labels"]) == set(["test", "test2"])
+    assert set(agent.call_args[1]["labels"]) == {"test", "test2"}
 
 
 class TestSlugGeneration:

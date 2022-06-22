@@ -95,11 +95,7 @@ class CosmosDBCreateItem(Task):
             url_connection=url, auth=auth_dict
         )
 
-        return_item = client.CreateItem(
-            database_or_container_link, item, options=options
-        )
-
-        return return_item
+        return client.CreateItem(database_or_container_link, item, options=options)
 
 
 class CosmosDBReadItems(Task):

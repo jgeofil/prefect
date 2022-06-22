@@ -36,7 +36,7 @@ def test_create_link_artifact(client, running_with_backend):
 def test_create_link_artifact_not_using_backend(client):
     with context(task_run_id="trid"):
         artifact_id = artifacts.create_link_artifact(link="link_here")
-        assert artifact_id == None
+        assert artifact_id is None
         assert not client.create_task_run_artifact.called
 
 
@@ -69,7 +69,7 @@ def test_create_markdown_artifact(client, running_with_backend):
 def test_create_markdown_artifact_not_using_backend(client):
     with context(task_run_id="trid"):
         artifact_id = artifacts.create_markdown_artifact(markdown="markdown_here")
-        assert artifact_id == None
+        assert artifact_id is None
         assert not client.create_task_run_artifact.called
 
 

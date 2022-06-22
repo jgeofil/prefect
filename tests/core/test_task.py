@@ -422,8 +422,8 @@ class TestInputsOutputs:
             return x + y
 
     @task
-    def mult(x, y: int = 1) -> int:
-        return x * y
+    def mult(self, y: int = 1) -> int:
+        return self * y
 
     def test_inputs(self):
         assert self.add().inputs() == dict(

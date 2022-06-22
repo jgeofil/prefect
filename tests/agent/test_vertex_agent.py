@@ -56,7 +56,7 @@ def graphql_result(run_config):
 
 
 def test_agent_defaults(agent, project, region):
-    assert set(agent.labels) == set()
+    assert not set(agent.labels)
     assert agent.name == "agent"
     assert agent.project == project
     assert agent.service_account is None

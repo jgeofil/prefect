@@ -240,8 +240,7 @@ class FlowView:
         if not flows:
             return {}
 
-        flow = flows[0]
-        return flow
+        return flows[0]
 
     @staticmethod
     def _query_for_flows(
